@@ -1,0 +1,39 @@
+[project]
+name = "icu-sync"
+version = "0.1.0"
+description = "Sync ICU patient data from HOSxP to ICU consultation service."
+readme = "README.md"
+authors = [
+    { name = "Gaggerhup", email = "peet.suphanida@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "pymysql>=1.1.3",
+    "pyqt6==6.9.1",
+    "pyqt6-qt6==6.9.0",
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.1",
+]
+
+[project.scripts]
+icu-sync = "start:main"
+
+[tool.uv]
+package = false
+
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = [
+    "DlgPatientDetail",
+    "DlgSetting",
+    "hosxp_lib",
+    "icuconsult_api_lib",
+    "icucons_schema_lib",
+    "Main_logic",
+    "Main_ui",
+    "start",
+    "setting_lib",
+]
