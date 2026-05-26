@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
 )
 
+from app_locale_lib import apply_widget_number_locale
 from hosxp_lib import HosxpClient
 from setting_lib import (
     AppSettings,
@@ -46,6 +47,7 @@ class DlgSetting(QDialog):
         self.hosxp_port_input = QSpinBox()
         self.hosxp_port_input.setRange(1, 65535)
         self.hosxp_port_input.setValue(settings.hosxp_port)
+        apply_widget_number_locale(self.hosxp_port_input)
         self.hosxp_database_input = QLineEdit(settings.hosxp_database)
         self.hosxp_user_input = QLineEdit(settings.hosxp_user)
         self.hosxp_password_input = QLineEdit(settings.hosxp_password)
@@ -58,6 +60,7 @@ class DlgSetting(QDialog):
         self.icucons_timeout_input = QSpinBox()
         self.icucons_timeout_input.setRange(1, 300)
         self.icucons_timeout_input.setValue(settings.icucons_timeout)
+        apply_widget_number_locale(self.icucons_timeout_input)
         self._test_thread: QThread | None = None
         self._test_worker: ConnectionTestWorker | None = None
 

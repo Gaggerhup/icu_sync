@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem,
 )
 
+from app_locale_lib import configure_app_locale
 from DlgPatientDetail import DlgPatientDetail
 from DlgSetting import DlgSetting
 from hosxp_lib import HosxpClient, HosxpConnectionError
@@ -335,6 +336,7 @@ class MainWindowLogic(QMainWindow):
 
 
 def create_app() -> QApplication:
+    configure_app_locale()
     app = QApplication(sys.argv)
     app.setOrganizationName("PLKHealth")
     app.setApplicationName("ICU-Sync")

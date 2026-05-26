@@ -15,6 +15,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from app_locale_lib import apply_widget_number_locale
+
 
 class MainWindowUI:
     patient_columns = [
@@ -53,12 +55,14 @@ class MainWindowUI:
         self.admit_from_date.setCalendarPopup(True)
         self.admit_from_date.setDisplayFormat("yyyy-MM-dd")
         self.admit_from_date.setDate(QDate.currentDate())
+        apply_widget_number_locale(self.admit_from_date)
 
         range_label = QLabel("ถึง")
         self.admit_to_date = QDateEdit()
         self.admit_to_date.setCalendarPopup(True)
         self.admit_to_date.setDisplayFormat("yyyy-MM-dd")
         self.admit_to_date.setDate(QDate.currentDate())
+        apply_widget_number_locale(self.admit_to_date)
 
         ward_label = QLabel("Ward")
         self.ward_filter_combo = QComboBox()

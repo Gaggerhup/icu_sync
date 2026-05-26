@@ -29,6 +29,7 @@ build-backend = "setuptools.build_meta"
 py-modules = [
     "DlgPatientDetail",
     "DlgSetting",
+    "app_locale_lib",
     "hosxp_lib",
     "icuconsult_api_lib",
     "icucons_schema_lib",
