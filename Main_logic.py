@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import (
 )
 
 from app_locale_lib import configure_app_locale
+from app_single_instance_lib import SingleInstanceError, acquire_single_instance_lock
 from DlgPatientDetail import DlgPatientDetail
 from DlgSetting import DlgSetting
 from hosxp_lib import HosxpClient, HosxpConnectionError
@@ -34,12 +35,18 @@ class PatientSchemaFetchWorker(QObject):
             api_client = IcuconsultApiClient(self.settings)
             payloads = []
             results = []
-            for patient in self.patients:
+            post_interval_seconds = max(
+                int(getattr(self.settings, "icucons_post_interval_minutes", 0)),
+                0,
+            ) * 60
+            for patient_index, patient in enumerate(self.patients):
                 an = str(patient.get("an", ""))
                 hn = str(patient.get("hn", ""))
                 payload = client.fetch_web_case_payload(an, hn)
                 payloads.append(payload)
                 results.append(api_client.sync_case(payload))
+                if post_interval_seconds and patient_index < len(self.patients) - 1:
+                    QThread.sleep(post_interval_seconds)
         except HosxpConnectionError as exc:
             self.failed.emit("เชื่อมต่อ HOSxP ไม่สำเร็จ", str(exc))
             return
@@ -108,8 +115,14 @@ class MainWindowLogic(QMainWindow):
     def open_settings(self) -> None:
         dialog = DlgSetting(self.app_settings, self)
         if dialog.exec():
-            self.app_settings = dialog.values()
-            self.settings_logic.save(self.app_settings)
+            next_settings = dialog.values()
+            try:
+                self.settings_logic.save(next_settings)
+            except Exception as exc:
+                QMessageBox.critical(self, "Save settings failed", str(exc))
+                self.statusBar().showMessage("Save settings failed.", 5000)
+                return
+            self.app_settings = next_settings
             self.refresh_connection_summary()
             self.statusBar().showMessage("Settings saved.", 3000)
 
@@ -340,6 +353,11 @@ def create_app() -> QApplication:
     app = QApplication(sys.argv)
     app.setOrganizationName("PLKHealth")
     app.setApplicationName("ICU-Sync")
+    try:
+        app._single_instance_lock = acquire_single_instance_lock()
+    except SingleInstanceError as exc:
+        QMessageBox.information(None, "ICU-Sync already running", str(exc))
+        sys.exit(0)
     return app
 
 

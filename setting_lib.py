@@ -3,6 +3,8 @@ from urllib.parse import urlsplit, urlunsplit
 
 from PyQt6.QtCore import QSettings
 
+from app_startup_lib import is_windows_startup_enabled, set_windows_startup_enabled
+
 
 APP_ORG = "PLKHealth"
 APP_NAME = "ICU-Sync"
@@ -28,6 +30,8 @@ class AppSettings:
     icucons_api_path: str = DEFAULT_ICUCONS_API_PATH
     icucons_api_token: str = ""
     icucons_timeout: int = 30
+    icucons_post_interval_minutes: int = 0
+    run_on_windows_boot: bool = False
 
 
 def split_icucons_api_endpoint(endpoint: str) -> tuple[str, str]:
@@ -98,6 +102,12 @@ class SettingsLogic:
             icucons_api_path=icucons_api_path,
             icucons_api_token=self._settings.value("icucons/api_token", "", str),
             icucons_timeout=self._settings.value("icucons/timeout", 30, int),
+            icucons_post_interval_minutes=self._settings.value(
+                "icucons/post_interval_minutes",
+                0,
+                int,
+            ),
+            run_on_windows_boot=is_windows_startup_enabled(),
         )
 
     def save(self, values: AppSettings) -> None:
@@ -113,4 +123,10 @@ class SettingsLogic:
         self._settings.setValue("icucons/api_path", api_path)
         self._settings.setValue("icucons/api_token", values.icucons_api_token)
         self._settings.setValue("icucons/timeout", values.icucons_timeout)
+        self._settings.setValue(
+            "icucons/post_interval_minutes",
+            values.icucons_post_interval_minutes,
+        )
+        self._settings.setValue("app/run_on_windows_boot", values.run_on_windows_boot)
+        set_windows_startup_enabled(values.run_on_windows_boot)
         self._settings.sync()

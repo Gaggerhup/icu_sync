@@ -30,6 +30,8 @@ py-modules = [
     "DlgPatientDetail",
     "DlgSetting",
     "app_locale_lib",
+    "app_single_instance_lib",
+    "app_startup_lib",
     "hosxp_lib",
     "icuconsult_api_lib",
     "icucons_schema_lib",

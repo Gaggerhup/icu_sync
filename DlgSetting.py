@@ -1,5 +1,6 @@
 from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
@@ -12,6 +13,7 @@ from PyQt6.QtWidgets import (
 )
 
 from app_locale_lib import apply_widget_number_locale
+from app_startup_lib import is_windows_startup_supported
 from hosxp_lib import HosxpClient
 from setting_lib import (
     AppSettings,
@@ -61,6 +63,18 @@ class DlgSetting(QDialog):
         self.icucons_timeout_input.setRange(1, 300)
         self.icucons_timeout_input.setValue(settings.icucons_timeout)
         apply_widget_number_locale(self.icucons_timeout_input)
+        self.icucons_post_interval_input = QSpinBox()
+        self.icucons_post_interval_input.setRange(0, 1440)
+        self.icucons_post_interval_input.setValue(
+            settings.icucons_post_interval_minutes
+        )
+        self.icucons_post_interval_input.setSuffix(" min")
+        apply_widget_number_locale(self.icucons_post_interval_input)
+        self.run_on_windows_boot_checkbox = QCheckBox(
+            "Run ICU-Sync when Windows starts"
+        )
+        self.run_on_windows_boot_checkbox.setChecked(settings.run_on_windows_boot)
+        self.run_on_windows_boot_checkbox.setEnabled(is_windows_startup_supported())
         self._test_thread: QThread | None = None
         self._test_worker: ConnectionTestWorker | None = None
 
@@ -73,6 +87,10 @@ class DlgSetting(QDialog):
         form_layout.addRow("ICUCONS API endpoint", self.icucons_api_endpoint_input)
         form_layout.addRow("ICUCONS API token", self.icucons_api_token_input)
         form_layout.addRow("ICUCONS timeout (sec)", self.icucons_timeout_input)
+        form_layout.addRow(
+            "POST /api/icu interval",
+            self.icucons_post_interval_input,
+        )
 
         buttons = QDialogButtonBox(
             QDialogButtonBox.StandardButton.Save
@@ -87,9 +105,15 @@ class DlgSetting(QDialog):
         test_layout.addWidget(self.test_connection_button)
         test_layout.addStretch(1)
 
+        startup_layout = QHBoxLayout()
+        startup_layout.addWidget(self.run_on_windows_boot_checkbox)
+        startup_layout.addStretch(1)
+
         layout = QVBoxLayout(self)
         layout.addLayout(form_layout)
         layout.addLayout(test_layout)
+        layout.addStretch(1)
+        layout.addLayout(startup_layout)
         layout.addWidget(buttons)
 
     def test_connection(self) -> None:
@@ -145,4 +169,6 @@ class DlgSetting(QDialog):
             icucons_api_path=api_path,
             icucons_api_token=self.icucons_api_token_input.text(),
             icucons_timeout=self.icucons_timeout_input.value(),
+            icucons_post_interval_minutes=self.icucons_post_interval_input.value(),
+            run_on_windows_boot=self.run_on_windows_boot_checkbox.isChecked(),
         )
